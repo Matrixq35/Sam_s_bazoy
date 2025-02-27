@@ -5,11 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Telegram WebApp</title>
+    <!-- Подключаем Telegram WebApp API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
     <div>
+        <!-- Элемент для отображения имени пользователя -->
         <h2>Добро пожаловать, <span id="username">Пользователь</span>!</h2>
         <p id="balance">Баланс: 0</p>
         <button id="tapButton">Добавить 1</button>
@@ -18,6 +20,7 @@
     <script>
         let TelegramUserId = null;
 
+        // Если приложение запущено в Telegram, получаем данные пользователя
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
@@ -31,9 +34,11 @@
                 TelegramUserId = "telegram_fallback";
             }
         } else {
+            // Если тестируете вне Telegram
             TelegramUserId = "test-user";
         }
 
+        // Функция для загрузки баланса с сервера
         function loadBalance() {
             fetch(`/balance/${TelegramUserId}`)
                 .then(response => response.json())
@@ -44,8 +49,9 @@
                 .catch(error => console.error("Ошибка при загрузке баланса:", error));
         }
 
+        // Функция для увеличения баланса
         function updateBalance() {
-            fetch(`/balance`, {
+            fetch("/balance", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ telegram_id: TelegramUserId, amount: 1 })
@@ -55,6 +61,7 @@
                 .catch(error => console.error("Ошибка при обновлении баланса:", error));
         }
 
+        // Назначаем обработчик на кнопку
         document.getElementById("tapButton").addEventListener("click", updateBalance);
 
         // Загружаем баланс при загрузке страницы

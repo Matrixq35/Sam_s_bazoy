@@ -8,7 +8,14 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
+
+// Обслуживание статичных файлов из папки "public"
 app.use(express.static(path.join(__dirname, "public")));
+
+// Явный маршрут для главной страницы, чтобы отдать index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 const db = new sqlite3.Database("./database.db", (err) => {
   if (err) {
@@ -18,7 +25,6 @@ const db = new sqlite3.Database("./database.db", (err) => {
   }
 });
 
-// Создаём таблицу пользователей (если не существует)
 db.run(
   `CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,8 +33,8 @@ db.run(
   )`
 );
 
-// Получить баланс пользователя по Telegram ID.
-// Если пользователь не найден, создаём запись с балансом 0.
+// GET-запрос для получения баланса по telegram_id.
+// Если пользователя нет, создаём запись с балансом 0.
 app.get("/balance/:telegram_id", (req, res) => {
   const { telegram_id } = req.params;
   db.get("SELECT balance FROM users WHERE telegram_id = ?", [telegram_id], (err, row) => {
@@ -36,10 +42,8 @@ app.get("/balance/:telegram_id", (req, res) => {
       return res.status(500).json({ error: err.message });
     }
     if (row) {
-      // Пользователь найден – возвращаем баланс
       res.json({ balance: row.balance });
     } else {
-      // Пользователь не найден – создаём запись с балансом 0
       db.run("INSERT INTO users (telegram_id, balance) VALUES (?, 0)", [telegram_id], (err2) => {
         if (err2) {
           return res.status(500).json({ error: err2.message });
@@ -50,7 +54,7 @@ app.get("/balance/:telegram_id", (req, res) => {
   });
 });
 
-// Добавить или обновить баланс пользователя (при нажатии кнопки)
+// POST-запрос для обновления (увеличения) баланса.
 app.post("/balance", (req, res) => {
   const { telegram_id, amount } = req.body;
   if (!telegram_id || typeof amount !== "number") {
@@ -61,8 +65,10 @@ app.post("/balance", (req, res) => {
     [telegram_id, amount, amount],
     function (err) {
       if (err) {
+        console.error("Ошибка обновления баланса:", err.message);
         return res.status(500).json({ error: err.message });
       }
+      console.log(`Баланс пользователя ${telegram_id} увеличен на ${amount}`);
       res.json({ success: true });
     }
   );
