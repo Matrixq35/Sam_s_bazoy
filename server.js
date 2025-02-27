@@ -2,12 +2,16 @@ const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// 📌 Раздача статических файлов (HTML, CSS, JS) из папки public
+app.use(express.static(path.join(__dirname, "public")));
 
 // Подключение к базе данных SQLite
 const db = new sqlite3.Database("./database.sqlite", (err) => {
@@ -27,6 +31,11 @@ db.run(
     )`
 );
 
+// 📌 Отдаём HTML-страницу при GET-запросе на "/"
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 // 📌 Получение баланса пользователя
 app.get("/balance/:telegram_id", (req, res) => {
     const { telegram_id } = req.params;
@@ -40,7 +49,7 @@ app.get("/balance/:telegram_id", (req, res) => {
             } else if (row) {
                 res.json({ balance: row.balance });
             } else {
-                // Если пользователь не найден — создаём его
+                // Если пользователя нет — создаём
                 db.run(
                     "INSERT INTO users (telegram_id, balance) VALUES (?, ?)",
                     [telegram_id, 0],
@@ -74,6 +83,7 @@ app.post("/balance/update", (req, res) => {
     );
 });
 
+// 📌 Запуск сервера
 app.listen(port, () => {
     console.log(`🚀 Сервер запущен на http://localhost:${port}`);
 });
