@@ -46,7 +46,7 @@
         // Функция для получения баланса с сервера
         async function getBalance() {
             try {
-                const response = await fetch(`http://localhost:3000/balance/${user_id}`);
+                const response = await fetch(`/balance/${user_id}`);
                 const data = await response.json();
                 balanceHTML.textContent = `Баланс: ${data.balance}`;
             } catch (error) {
@@ -57,7 +57,7 @@
         // Функция для обновления баланса
         async function updateBalance(newBalance) {
             try {
-                await fetch("http://localhost:3000/balance/update", {
+                await fetch("/balance/update", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
