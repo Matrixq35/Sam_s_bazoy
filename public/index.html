@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div>
+        <span id="balance">Баланс: 0</span><br>
+        <button id="tapButton">клик</button>
+    </div>
+    <script>
+    let TelegramUserId = null;
+
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+
+        const user = window.Telegram.WebApp.initDataUnsafe;
+        if (user && user.user) {
+            TelegramUserId = user.user.id;
+            document.getElementById("username").textContent = user.user.first_name;
+            loadBalance();
+        } else {
+            console.log("Ошибка: не удалось получить данные пользователя.");
+        }
+    }
+
+    const balanceElement = document.getElementById("balance");
+    const button = document.getElementById("tapButton");
+
+    
+    function loadBalance() {
+        fetch(`http://localhost:3000/balance/${TelegramUserId}`)
+            .then(response => response.json())
+            .then(data => {
+                balanceElement.textContent = `Баланс: ${data.balance}`;
+            })
+            .catch(error => console.error("Ошибка при загрузке баланса:", error));
+    }
+
+    
+    function tapButton() {
+        fetch("http://localhost:3000/balance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ telegram_id: TelegramUserId, amount: 1 })
+        })
+            .then(response => response.json())
+            .then(() => loadBalance()) // Обновляем баланс
+            .catch(error => console.error("Ошибка при обновлении баланса:", error));
+    }
+
+    button.addEventListener("click", tapButton);
+    </script>
+</body>
+</html>
