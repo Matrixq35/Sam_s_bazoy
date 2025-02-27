@@ -1,59 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Telegram WebApp</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
+
 <body>
     <div>
+        <!-- Добавлен элемент для отображения имени пользователя -->
+        <h2>Добро пожаловать, <span id="username">Пользователь</span>!</h2>
         <span id="balance">Баланс: 0</span><br>
         <button id="tapButton">клик</button>
     </div>
     <script>
-    let TelegramUserId = null;
+        let TelegramUserId = null;
 
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
 
-        const user = window.Telegram.WebApp.initDataUnsafe;
-        if (user && user.user) {
-            TelegramUserId = user.user.id;
-            document.getElementById("username").textContent = user.user.first_name;
-            loadBalance();
+            const user = window.Telegram.WebApp.initDataUnsafe;
+            if (user && user.user) {
+                TelegramUserId = user.user.id;
+                document.getElementById("username").textContent = user.user.first_name;
+                loadBalance();
+            } else {
+                console.log("Ошибка: не удалось получить данные пользователя.");
+                // Для локального тестирования можно задать тестовый ID:
+                TelegramUserId = "test-user";
+                loadBalance();
+            }
         } else {
-            console.log("Ошибка: не удалось получить данные пользователя.");
+            // Если приложение тестируется вне Telegram, зададим тестовый ID
+            TelegramUserId = "test-user";
+            loadBalance();
         }
-    }
 
-    const balanceElement = document.getElementById("balance");
-    const button = document.getElementById("tapButton");
+        const balanceElement = document.getElementById("balance");
+        const button = document.getElementById("tapButton");
 
-    
-    function loadBalance() {
-        fetch(`/balance/${TelegramUserId}`)
-            .then(response => response.json())
-            .then(data => {
-                balanceElement.textContent = `Баланс: ${data.balance}`;
+        function loadBalance() {
+            fetch(`/balance/${TelegramUserId}`)
+                .then(response => response.json())
+                .then(data => {
+                    balanceElement.textContent = `Баланс: ${data.balance}`;
+                    console.log("Баланс загружен:", data.balance);
+                })
+                .catch(error => console.error("Ошибка при загрузке баланса:", error));
+        }
+
+        function tapButton() {
+            fetch("/balance", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ telegram_id: TelegramUserId, amount: 1 })
             })
-            .catch(error => console.error("Ошибка при загрузке баланса:", error));
-    }
+                .then(response => response.json())
+                .then(() => loadBalance()) // Обновляем баланс
+                .catch(error => console.error("Ошибка при обновлении баланса:", error));
+        }
 
-    
-    function tapButton() {
-        fetch("/balance", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ telegram_id: TelegramUserId, amount: 1 })
-        })
-            .then(response => response.json())
-            .then(() => loadBalance()) // Обновляем баланс
-            .catch(error => console.error("Ошибка при обновлении баланса:", error));
-    }
-
-    button.addEventListener("click", tapButton);
+        button.addEventListener("click", tapButton);
     </script>
 </body>
+
 </html>
