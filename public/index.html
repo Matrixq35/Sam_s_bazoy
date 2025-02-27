@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram WebApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #one {
+            background-color: blanchedalmond;
+            width: 500px;
+            height: 250px;
+            padding: 15px;
+            border-radius: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="one">
+        <h2>Добро пожаловать, <span id="username">Пользователь</span>!</h2>
+        <p id="balance">Баланс: 0</p>
+        <button id="tapButton">Добавить 1</button>
+    </div>
+    <script>
+        const balanceHTML = document.getElementById("balance");
+        const button = document.getElementById("tapButton");
+
+        // Telegram API
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Получение user_id из Telegram WebApp
+        const user_id = tg.initDataUnsafe?.user?.id || "test_user";
+
+        // Функция для получения баланса с сервера
+        async function getBalance() {
+            try {
+                const response = await fetch(`http://localhost:3000/balance/${user_id}`);
+                const data = await response.json();
+                balanceHTML.textContent = `Баланс: ${data.balance}`;
+            } catch (error) {
+                console.error("Ошибка при получении баланса:", error);
+            }
+        }
+
+        // Функция для обновления баланса
+        async function updateBalance(newBalance) {
+            try {
+                await fetch("http://localhost:3000/balance/update", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ telegram_id: user_id, balance: newBalance }),
+                });
+                balanceHTML.textContent = `Баланс: ${newBalance}`;
+            } catch (error) {
+                console.error("Ошибка при обновлении баланса:", error);
+            }
+        }
+
+        // Добавление 1 к балансу
+        button.addEventListener("click", async () => {
+            let currentBalance = parseInt(balanceHTML.textContent.replace("Баланс: ", ""));
+            let newBalance = currentBalance + 1;
+            await updateBalance(newBalance);
+        });
+
+        // Загружаем баланс при открытии
+        getBalance();
+    </script>
+</body>
+
+</html>
