@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div>
+        <span id="balance">Баланс: 0</span><br>
+        <button id="tapButton">клик</button>
+    </div>
+    <script>
+        if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+
+
+                const user = window.Telegram.WebApp.initDataUnSafe;
+                const TelegramUserId = user.user.id;
+            }
+
+
+        const balance = document.getElementById('balance');
+        const button = document.getElementById('tapButton');
+
+        let getBalance = 0;
+
+        function tapButton() {
+            getBalance += 1;
+            balance.textContent = `Баланс: ${getBalance}`;
+            console.log('+ 1');
+        }
+
+        button.addEventListener('click', tapButton)
+    </script>
+</body>
+</html>
