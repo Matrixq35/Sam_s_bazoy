@@ -33,7 +33,7 @@
 
     
     function loadBalance() {
-        fetch(`http://localhost:3000/balance/${TelegramUserId}`)
+        fetch(`http://localhost:8080/balance/${TelegramUserId}`)
             .then(response => response.json())
             .then(data => {
                 balanceElement.textContent = `Баланс: ${data.balance}`;
@@ -43,7 +43,7 @@
 
     
     function tapButton() {
-        fetch("http://localhost:3000/balance", {
+        fetch("http://localhost:8080/balance", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ telegram_id: TelegramUserId, amount: 1 })
