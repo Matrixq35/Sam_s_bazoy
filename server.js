@@ -53,12 +53,25 @@ app.get("/balance/:user_id", (req, res) => {
 app.post("/balance/update", (req, res) => {
     const { user_id, balance } = req.body;
 
-    db.run("UPDATE users SET balance = ? WHERE user_id = ?", [balance, user_id], function (err) {
+    db.get("SELECT * FROM users WHERE user_id = ?", [user_id], (err, row) => {
         if (err) {
-            console.error("Ошибка при обновлении баланса:", err.message);
+            console.error("Ошибка при поиске пользователя:", err.message);
             return res.status(500).json({ error: err.message });
         }
-        res.json({ success: true });
+
+        if (!row) {
+            console.error(`❌ Пользователь ${user_id} не найден в базе`);
+            return res.status(404).json({ error: "Пользователь не найден" });
+        }
+
+        db.run("UPDATE users SET balance = ? WHERE user_id = ?", [balance, user_id], function (err) {
+            if (err) {
+                console.error("Ошибка при обновлении баланса:", err.message);
+                return res.status(500).json({ error: err.message });
+            }
+            console.log(`✅ Баланс пользователя ${user_id} обновлен: ${balance}`);
+            res.json({ success: true });
+        });
     });
 });
 
