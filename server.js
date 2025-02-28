@@ -23,13 +23,13 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
 });
 
 // Создание таблицы, если её нет
-db.run(
-    `CREATE TABLE IF NOT EXISTS users (
+db.run(`
+    CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        telegram_id TEXT UNIQUE,
+        user_id TEXT UNIQUE,
         balance INTEGER DEFAULT 0
-    )`
-);
+    )
+`);
 
 // 📌 Отдаём HTML-страницу при GET-запросе на "/"
 app.get("/", (req, res) => {
@@ -37,12 +37,12 @@ app.get("/", (req, res) => {
 });
 
 // 📌 Получение баланса пользователя
-app.get("/balance/:telegram_id", (req, res) => {
-    const { telegram_id } = req.params;
+app.get("/balance/:user_id", (req, res) => {
+    const { user_id } = req.params;
 
     db.get(
-        "SELECT balance FROM users WHERE telegram_id = ?",
-        [telegram_id],
+        "SELECT balance FROM users WHERE user_id = ?",
+        [user_id],
         (err, row) => {
             if (err) {
                 res.status(500).json({ error: err.message });
@@ -51,8 +51,8 @@ app.get("/balance/:telegram_id", (req, res) => {
             } else {
                 // Если пользователя нет — создаём
                 db.run(
-                    "INSERT INTO users (telegram_id, balance) VALUES (?, ?)",
-                    [telegram_id, 0],
+                    "INSERT INTO users (user_id, balance) VALUES (?, ?)",
+                    [user_id, 0],
                     function (err) {
                         if (err) {
                             res.status(500).json({ error: err.message });
@@ -68,11 +68,11 @@ app.get("/balance/:telegram_id", (req, res) => {
 
 // 📌 Обновление баланса
 app.post("/balance/update", (req, res) => {
-    const { telegram_id, balance } = req.body;
+    const { user_id, balance } = req.body;
 
     db.run(
-        "UPDATE users SET balance = ? WHERE telegram_id = ?",
-        [balance, telegram_id],
+        "UPDATE users SET balance = ? WHERE user_id = ?",
+        [balance, user_id],
         function (err) {
             if (err) {
                 res.status(500).json({ error: err.message });
@@ -85,5 +85,5 @@ app.post("/balance/update", (req, res) => {
 
 // 📌 Запуск сервера
 app.listen(port, () => {
-    console.log(`🚀 Сервер запущен на http://localhost:${port}`);
+    console.log(`✅ Сервер запущен на http://localhost:${port}`);
 });

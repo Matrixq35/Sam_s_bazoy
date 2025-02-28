@@ -62,7 +62,7 @@
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ telegram_id: user_id, balance: newBalance }),
+                    body: JSON.stringify({ user_id: user_id, balance: newBalance }),
                 });
                 balanceHTML.textContent = `Баланс: ${newBalance}`;
             } catch (error) {
