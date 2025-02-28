@@ -7,13 +7,10 @@ const path = require("path");
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors({ origin: "*" })); // Разрешаем доступ отовсюду
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
-
-// 📌 Раздача статических файлов (HTML, CSS, JS) из папки public
 app.use(express.static(path.join(__dirname, "public")));
 
-// Подключение к базе данных SQLite
 const db = new sqlite3.Database("./database.sqlite", (err) => {
     if (err) {
         console.error("Ошибка подключения к БД:", err.message);
@@ -22,7 +19,7 @@ const db = new sqlite3.Database("./database.sqlite", (err) => {
     }
 });
 
-// Создание таблицы, если её нет
+// Создание таблицы (если её нет)
 db.run(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,65 +28,43 @@ db.run(`
     )
 `);
 
-// 📌 Отдаём HTML-страницу при GET-запросе на "/"
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 // 📌 Получение баланса пользователя
 app.get("/balance/:user_id", (req, res) => {
-    const { user_id } = req.params;  // Извлекаем user_id из URL
+    const { user_id } = req.params;
 
-    // Ищем пользователя в базе данных
-    db.get(
-        "SELECT balance FROM users WHERE user_id = ?",
-        [user_id],
-        (err, row) => {
-            if (err) {
-                res.status(500).json({ error: err.message });
-            } else if (row) {
-                // Если пользователь найден — возвращаем его баланс
-                res.json({ balance: row.balance });
-            } else {
-                // Если пользователя нет — создаем его с нулевым балансом
-                db.run(
-                    "INSERT INTO users (user_id, balance) VALUES (?, ?)",
-                    [user_id, 0],
-                    function (err) {
-                        if (err) {
-                            res.status(500).json({ error: err.message });
-                        } else {
-                            res.json({ balance: 0 });
-                        }
-                    }
-                );
-            }
+    db.get("SELECT balance FROM users WHERE user_id = ?", [user_id], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
         }
-    );
+        if (row) {
+            return res.json({ balance: row.balance });
+        } else {
+            db.run("INSERT INTO users (user_id, balance) VALUES (?, ?)", [user_id, 0], function (err) {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+                res.json({ balance: 0 });
+            });
+        }
+    });
 });
 
-// 📌 Обновление баланса пользователя
+// 📌 Обновление баланса
 app.post("/balance/update", (req, res) => {
-    const { user_id, balance } = req.body;  // Получаем данные из тела запроса
+    const { user_id, balance } = req.body;
 
-    // Обновляем баланс пользователя в базе данных
-    db.run(
-        "UPDATE users SET balance = ? WHERE user_id = ?",
-        [balance, user_id],
-        function (err) {
-            if (err) {
-                res.status(500).json({ error: err.message });
-            } else {
-                res.json({ success: true });
-            }
+    db.run("UPDATE users SET balance = ? WHERE user_id = ?", [balance, user_id], function (err) {
+        if (err) {
+            console.error("Ошибка при обновлении баланса:", err.message);
+            return res.status(500).json({ error: err.message });
         }
-    );
+        res.json({ success: true });
+    });
 });
 
 // 📌 Эндпоинт для скачивания базы данных
 app.get("/download-db", (req, res) => {
     const filePath = path.join(__dirname, "database.sqlite");
-
     res.download(filePath, "database.sqlite", (err) => {
         if (err) {
             console.error("Ошибка при скачивании базы данных:", err);
@@ -97,7 +72,6 @@ app.get("/download-db", (req, res) => {
         }
     });
 });
-
 
 // 📌 Запуск сервера
 app.listen(port, () => {
