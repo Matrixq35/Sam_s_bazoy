@@ -38,8 +38,9 @@ app.get("/", (req, res) => {
 
 // 📌 Получение баланса пользователя
 app.get("/balance/:user_id", (req, res) => {
-    const { user_id } = req.params;
+    const { user_id } = req.params;  // Извлекаем user_id из URL
 
+    // Ищем пользователя в базе данных
     db.get(
         "SELECT balance FROM users WHERE user_id = ?",
         [user_id],
@@ -47,9 +48,10 @@ app.get("/balance/:user_id", (req, res) => {
             if (err) {
                 res.status(500).json({ error: err.message });
             } else if (row) {
+                // Если пользователь найден — возвращаем его баланс
                 res.json({ balance: row.balance });
             } else {
-                // Если пользователя нет — создаём
+                // Если пользователя нет — создаем его с нулевым балансом
                 db.run(
                     "INSERT INTO users (user_id, balance) VALUES (?, ?)",
                     [user_id, 0],
@@ -66,10 +68,11 @@ app.get("/balance/:user_id", (req, res) => {
     );
 });
 
-// 📌 Обновление баланса
+// 📌 Обновление баланса пользователя
 app.post("/balance/update", (req, res) => {
-    const { user_id, balance } = req.body;
+    const { user_id, balance } = req.body;  // Получаем данные из тела запроса
 
+    // Обновляем баланс пользователя в базе данных
     db.run(
         "UPDATE users SET balance = ? WHERE user_id = ?",
         [balance, user_id],
