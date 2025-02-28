@@ -45,7 +45,7 @@
 
         const user_id = tg.initDataUnsafe?.user?.id || "test_user";
 
-        // Переменная баланса на фронтенде
+        // Локальная переменная баланса
         let balance = 0;
 
         async function getBalance() {
@@ -54,20 +54,30 @@
                 const data = await response.json();
                 balance = data.balance; // Сохраняем баланс в переменной
                 balanceHTML.textContent = `Баланс: ${balance}`;
+                console.log(`📥 Баланс загружен: ${balance}`);
             } catch (error) {
-                console.error("Ошибка при получении баланса:", error);
+                console.error("❌ Ошибка при получении баланса:", error);
             }
         }
 
         async function saveBalance() {
             try {
-                await fetch("/balance/update", {
+                console.log(`📤 Отправляем на сервер: user_id=${user_id}, balance=${balance}`);
+
+                const response = await fetch("/balance/update", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ user_id: user_id, balance: balance }),
                 });
+
+                const data = await response.json();
+                console.log(`✅ Ответ сервера:`, data);
+
+                if (!data.success) {
+                    console.error("❌ Сервер не обновил баланс:", data.error);
+                }
             } catch (error) {
-                console.error("Ошибка при сохранении баланса:", error);
+                console.error("❌ Ошибка при сохранении баланса:", error);
             }
         }
 
