@@ -86,6 +86,19 @@ app.post("/balance/update", (req, res) => {
     );
 });
 
+// 📌 Эндпоинт для скачивания базы данных
+app.get("/download-db", (req, res) => {
+    const filePath = path.join(__dirname, "database.sqlite");
+
+    res.download(filePath, "database.sqlite", (err) => {
+        if (err) {
+            console.error("Ошибка при скачивании базы данных:", err);
+            res.status(500).send("Ошибка при скачивании файла.");
+        }
+    });
+});
+
+
 // 📌 Запуск сервера
 app.listen(port, () => {
     console.log(`✅ Сервер запущен на http://localhost:${port}`);
