@@ -74,7 +74,7 @@
         button.addEventListener("click", async () => {
             let currentBalance = parseInt(balanceHTML.textContent.replace("Баланс: ", ""));
             let newBalance = currentBalance + 1;
-            await updateBalance(newBalance);
+            updateBalance(newBalance);
         });
 
         // Загружаем баланс при открытии
