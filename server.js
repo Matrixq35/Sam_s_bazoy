@@ -38,20 +38,20 @@ app.get("/balance/:user_id", (req, res) => {
         }
 
         if (row) {
-            console.log(`📤 Баланс для пользователя ${user_id}: ${row.balance}`);
+            console.log(`📤 Отдаем баланс для пользователя ${user_id}: ${row.balance}`);
             return res.json({ balance: row.balance });
         } else {
-            // Если пользователя нет, создаем его
+            console.log(`🆕 Пользователь ${user_id} не найден. Создаем новый.`);
             db.run("INSERT INTO users (user_id, balance) VALUES (?, ?)", [user_id, 0], function (err) {
                 if (err) {
                     return res.status(500).json({ error: err.message });
                 }
-                console.log(`🆕 Новый пользователь ${user_id} добавлен с балансом 0`);
                 res.json({ balance: 0 });
             });
         }
     });
 });
+
 
 // 📌 Обновление баланса (ГАРАНТИРОВАННО работает)
 app.post("/balance/update", (req, res) => {
