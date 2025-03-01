@@ -44,6 +44,16 @@ app.post('/save-telegram-id', (req, res) => {
     });
 });
 
+// Эндпоинт для скачивания базы данных
+app.get('/download-db', (req, res) => {
+    res.download(dbPath, 'users.db', (err) => {
+        if (err) {
+            console.error("Ошибка при отправке файла:", err);
+            res.status(500).send("Ошибка при скачивании базы данных.");
+        }
+    });
+});
+
 // Настройка Express для обслуживания статических файлов
 app.use(express.static(path.join(__dirname, 'public')));
 
