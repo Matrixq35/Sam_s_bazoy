@@ -1,7 +1,7 @@
 
 
 // Получаем элемент для вывода Telegram ID
-const balanceUserHTML = document.getElementById("balanceUser");
+const telegram_id_HTML = document.getElementById("balanceUser");
 
 window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
@@ -9,7 +9,7 @@ window.Telegram.WebApp.expand();
 
 // Получаем данные пользователя
 const userData = window.Telegram.WebApp.initDataUnsafe;
-const telegram_id = userData.user.id || "Неизвестный ID";
+const telegram_id = userData.user.id;
 
 
 
