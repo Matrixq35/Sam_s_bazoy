@@ -10,6 +10,7 @@ const telegram_id_HTML = document.getElementById("balanceUser");
 // Получаем данные пользователя
 const userData = window.Telegram.WebApp.initDataUnsafe;
 const telegram_id = userData.user.id;
+console.log('Ваш id: ', telegram_id);
 
 
 
