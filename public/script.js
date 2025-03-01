@@ -15,11 +15,7 @@ console.log('Ваш id: ', telegram_id);
 
 
 // Выводим ID, если элемент существует
-if (telegram_id_HTML) {
-    telegram_id_HTML.textContent = `Ваш ID: ${telegram_id}`;
-} else {
-    console.warn("Элемент #telegram_id не найден в HTML.");
-}
+telegram_id_HTML.textContent = `Ваш ID: ${telegram_id}`;
 
 
 
