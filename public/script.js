@@ -24,7 +24,7 @@ if (telegram_id_HTML) {
 
 
 // Отправка Telegram ID на сервер для сохранения
-fetch('https://samsbazoy-real-server.up.railway.app//save-telegram-id', {
+fetch('https://samsbazoy-real-server.up.railway.app/save-telegram-id', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
