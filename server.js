@@ -3,9 +3,11 @@ const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -80,6 +82,22 @@ app.get('/user/:telegram_id', (req, res) => {
         }
 
         res.json({ telegram_id: row.telegram_id, balance: row.balance });
+    });
+});
+
+// Эндпоинт для скачивания базы данных
+app.get('/download-db', (req, res) => {
+    // Проверяем, существует ли файл базы данных
+    if (!fs.existsSync(dbPath)) {
+        return res.status(404).send("Файл базы данных не найден.");
+    }
+
+    // Отправляем файл клиенту
+    res.download(dbPath, 'users.db', (err) => {
+        if (err) {
+            console.error("❌ Ошибка при отправке файла:", err);
+            res.status(500).send("Ошибка при скачивании базы данных.");
+        }
     });
 });
 
