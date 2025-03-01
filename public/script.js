@@ -3,7 +3,7 @@ window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
 
 // Получаем элемент для вывода Telegram ID
-const telegram_id_HTML = document.getElementById("balanceUser");
+const telegram_id_HTML = document.getElementById("telegram_id");
 
 
 
