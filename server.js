@@ -1,90 +1,52 @@
-const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const path = require("path");
+const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 8080;
 
-app.use(cors({ origin: "*" }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
+// Настройка body-parser для обработки JSON
+app.use(express.json());
 
-const db = new sqlite3.Database("./database.sqlite", (err) => {
+// Создание базы данных SQLite и таблицы (если не существует)
+const db = new sqlite3.Database('./users.db', (err) => {
     if (err) {
-        console.error("❌ Ошибка подключения к БД:", err.message);
+        console.error("Ошибка при подключении к базе данных: ", err.message);
     } else {
-        console.log("✅ Подключено к базе данных SQLite");
+        console.log("Подключение к базе данных установлено.");
     }
 });
 
-// Создание таблицы (если её нет)
 db.run(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT UNIQUE,
-        balance INTEGER DEFAULT 0
+        telegram_id TEXT UNIQUE
     )
 `);
 
-// 📌 Получение баланса пользователя
-app.get("/balance/:user_id", (req, res) => {
-    const { user_id } = req.params;
-
-    db.get("SELECT balance FROM users WHERE user_id = ?", [user_id], (err, row) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-
-        if (row) {
-            console.log(`📤 Отдаем баланс для пользователя ${user_id}: ${row.balance}`);
-            return res.json({ balance: row.balance });
-        } else {
-            console.log(`🆕 Пользователь ${user_id} не найден. Создаем новый.`);
-            db.run("INSERT INTO users (user_id, balance) VALUES (?, ?)", [user_id, 0], function (err) {
-                if (err) {
-                    return res.status(500).json({ error: err.message });
-                }
-                res.json({ balance: 0 });
-            });
-        }
-    });
-});
-
-
-// 📌 Обновление баланса (ГАРАНТИРОВАННО работает)
-app.post("/balance/update", (req, res) => {
-    const { user_id, balance } = req.body;
-
-    if (!user_id || balance === undefined) {
-        return res.status(400).json({ error: "Некорректные данные" });
+// Обработка POST запроса для сохранения telegram_id
+app.post('/save-telegram-id', (req, res) => {
+    console.log("Полученные данные:", req.body);  // Логируем тело запроса
+    const { telegram_id } = req.body;
+    
+    if (!telegram_id) {
+        return res.status(400).send("Telegram ID не предоставлен.");
     }
 
-    console.log(`🔄 Обновление баланса: user_id=${user_id}, новый баланс=${balance}`);
-
-    db.run("UPDATE users SET balance = ? WHERE user_id = ?", [balance, user_id], function (err) {
+    const stmt = db.prepare("INSERT OR IGNORE INTO users (telegram_id) VALUES (?)");
+    stmt.run(telegram_id, function(err) {
         if (err) {
-            console.error("❌ Ошибка при обновлении баланса:", err.message);
-            return res.status(500).json({ error: err.message });
+            console.error(err.message);
+            return res.status(500).send("Ошибка при сохранении Telegram ID.");
         }
-        console.log(`✅ Баланс пользователя ${user_id} обновлен: ${balance}`);
-        res.json({ success: true, balance: balance });
+        res.status(200).send({ message: "Telegram ID сохранен успешно." });
     });
 });
 
-// 📌 Эндпоинт для скачивания базы данных
-app.get("/download-db", (req, res) => {
-    const filePath = path.join(__dirname, "database.sqlite");
-    res.download(filePath, "database.sqlite", (err) => {
-        if (err) {
-            console.error("❌ Ошибка при скачивании базы данных:", err);
-            res.status(500).send("Ошибка при скачивании файла.");
-        }
-    });
-});
+// Настройка Express для обслуживания статических файлов
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 📌 Запуск сервера
 app.listen(port, () => {
-    console.log(`🚀 Сервер запущен на http://localhost:${port}`);
+    console.log(`Сервер запущен на http://localhost:${port}`);
 });

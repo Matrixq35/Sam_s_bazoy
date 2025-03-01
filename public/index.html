@@ -2,93 +2,38 @@
 <html lang="ru">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram WebApp</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        #one {
-            background-color: blanchedalmond;
-            width: 500px;
-            height: 250px;
-            padding: 15px;
-            border-radius: 20px;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
 
 <body>
-    <div id="one">
-        <h2>Добро пожаловать, <span id="username">Пользователь</span>!</h2>
-        <p id="balance">Баланс: 0</p>
-        <button id="tapButton">Добавить 1</button>
-        <br><br>
-        <a href="/download-db" download>
-            <button>📥 Скачать базу данных</button>
-        </a>
+
+    <div class="content">
+        <section id="home" class="tab-content active">
+            <h1>Главная</h1>
+            <p>Добро пожаловать в приложение!</p>
+            <span id="telegram_id"></span>
+        </section>
+        <section id="leaderboard" class="tab-content">
+            <h1>Лидерборд</h1>
+            <p>Таблица лидеров будет здесь.</p>
+        </section>
+        <section id="tasks" class="tab-content">
+            <h1>Задания</h1>
+            <p>Список заданий для выполнения.</p>
+        </section>
     </div>
-    <script>
-        const balanceHTML = document.getElementById("balance");
-        const button = document.getElementById("tapButton");
 
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-target="home">🏠 Главная</button>
+        <button class="nav-btn" data-target="leaderboard">🏆 Лидерборд</button>
+        <button class="nav-btn" data-target="tasks">📝 Задания</button>
+    </nav>
 
-        const user_id = tg.initDataUnsafe?.user?.id || "test_user";
-
-        // Локальная переменная баланса
-        let balance = 0;
-
-        async function getBalance() {
-            try {
-                const response = await fetch(`/balance/${user_id}`);
-                const data = await response.json();
-                balance = data.balance; // Сохраняем баланс в переменной
-                balanceHTML.textContent = `Баланс: ${balance}`;
-                console.log(`📥 Баланс загружен: ${balance}`);
-            } catch (error) {
-                console.error("❌ Ошибка при получении баланса:", error);
-            }
-        }
-
-        async function saveBalance() {
-            try {
-                console.log(`📤 Отправляем на сервер: user_id=${user_id}, balance=${balance}`);
-
-                const response = await fetch("/balance/update", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user_id: user_id, balance: balance }),
-                });
-
-                const data = await response.json();
-                console.log(`✅ Ответ сервера:`, data);
-
-                if (!data.success) {
-                    console.error("❌ Сервер не обновил баланс:", data.error);
-                }
-            } catch (error) {
-                console.error("❌ Ошибка при сохранении баланса:", error);
-            }
-        }
-
-        button.addEventListener("click", () => {
-            balance += 1; // Локально увеличиваем баланс
-            balanceHTML.textContent = `Баланс: ${balance}`;
-            saveBalance(); // Отправляем новый баланс на сервер
-        });
-
-        getBalance(); // Загружаем баланс при открытии страницы
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>

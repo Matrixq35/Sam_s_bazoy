@@ -1,0 +1,54 @@
+/* Общие стили */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+    text-align: center;
+}
+
+/* Контейнер с контентом */
+.content {
+    padding-bottom: 60px; /* Отступ, чтобы не закрывать контент навигацией */
+}
+
+/* Секции (разделы) */
+.tab-content {
+    display: none;
+    padding: 20px;
+}
+
+/* Активная секция */
+.tab-content.active {
+    display: block;
+}
+
+/* Нижняя навигационная панель */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+    padding: 10px 0;
+}
+
+/* Кнопки в навигации */
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #333;
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* Активная кнопка */
+.nav-btn.active {
+    font-weight: bold;
+    color: #007bff;
+}
