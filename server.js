@@ -83,7 +83,9 @@ app.get('/user/:telegram_id', (req, res) => {
     });
 });
 
-// Запуск сервера
+// Настройка Express для обслуживания статических файлов
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.listen(port, () => {
-    console.log(`🚀 Сервер запущен на порту ${port}`);
+    console.log(`Сервер запущен на http://localhost:${port}`);
 });
