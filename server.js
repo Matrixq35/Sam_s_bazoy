@@ -4,7 +4,7 @@ const path = require('path');
 
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 3000; // Используем порт от Railway или 3000 по умолчанию
 
 // Настройка body-parser для обработки JSON
 app.use(express.json());
