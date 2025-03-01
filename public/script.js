@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", () => {
 window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
 
@@ -61,4 +62,5 @@ buttons.forEach(button => {
             console.warn(`Секция с ID ${target} не найдена!`);
         }
     });
+});
 });
