@@ -6,6 +6,9 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000; // Используем порт от Railway или 3000 по умолчанию
 
+// Указываем путь к базе данных
+const dbPath = path.join(__dirname, 'users.db');
+
 // Настройка body-parser для обработки JSON
 app.use(express.json());
 
